@@ -22,7 +22,7 @@ To dive into the project and contribute:
 1. Clone the repository:
 
     ```bash
-    [git clone https://github.com/your-username/musichub.git](https://github.com/ahte24/Music-Player-X-Spotify-clone/tree/master)
+    https://github.com/ahte24/Music-Player-X-Spotify-clone/tree/master
     ```
 
 2. Open the project in your preferred code editor.
