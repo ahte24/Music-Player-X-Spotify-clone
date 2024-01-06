@@ -1,4 +1,4 @@
-# MusicHub - Your Ultimate Music Experience
+# HarmonyHubb - Your Ultimate Music Experience
 
 Welcome to MusicHub, an ongoing project that aims to create a cutting-edge web-based music player reminiscent of popular platforms like Spotify. Leveraging the power of HTML and CSS, we've laid the foundation for a visually stunning and user-friendly interface.
 
