@@ -1,11 +1,12 @@
 // Create a new audio object
 let currentSong = new Audio();
-
+let currFolder;
+let songs;
 // Define a function that converts seconds to minutes in the format mm:ss
 function secondsToMinutes(seconds) {
 	// Check if the input is a valid number and not negative
 	if (isNaN(seconds) || seconds < 0) {
-		return "Invalid input";
+		return "00:00";
 	}
 
 	// Calculate the number of minutes and remaining seconds
@@ -21,9 +22,10 @@ function secondsToMinutes(seconds) {
 }
 
 // Define an async function that fetches the songs from a server
-async function getSongs() {
+async function getSongs(folder) {
+	currFolder = folder;
 	// Send a GET request to the server
-	let a = await fetch("http://192.168.1.6:5000/musics/");
+	let a = await fetch(`http://192.168.1.6:5000/${folder}/`);
 	// Get the response as text
 	let response = await a.text();
 	// Create a div element and set its innerHTML to the response
@@ -40,7 +42,7 @@ async function getSongs() {
 		// Check if the element's href ends with .mp3
 		if (element.href.endsWith(".mp3")) {
 			// Extract the song name from the href and push it to the array
-			songs.push(element.href.split("/musics/")[1]);
+			songs.push(element.href.split(`/${folder}/`)[1]);
 		}
 	}
 	// Return the array of song names
@@ -50,7 +52,7 @@ async function getSongs() {
 // Define a function that plays a given track
 const playMusic = (track, pause = false) => {
 	// Set the source of the audio object to the track
-	currentSong.src = "/musics/" + track;
+	currentSong.src = `/${currFolder}/` + track;
 	// Check if the pause parameter is false
 	if (pause == false) {
 		// Play the audio
@@ -58,14 +60,39 @@ const playMusic = (track, pause = false) => {
 		// Change the play button's source to the pause icon
 		play.src = "imgs/pause.svg";
 	}
+	// Set the song info element's innerHTML to the song's information
+	document.querySelector(".songinfo").innerHTML = `
+	<img
+	class="thumbnail"
+	src="imgs/musics.svg"
+	alt="thumbnail"
+	/>
+	<div class="content">
+	<h3>${decodeURI(currentSong.src).split("naaths/")[1]}</h3>
+	<p>Allah ka banda</p>
+	</div>
+	`;
+
+	document.querySelector(".songinfo2").innerHTML = `
+	<img
+	class="thumbnail"
+	src="imgs/musics.svg"
+	alt="thumbnail"
+	/>
+	<div class="content">
+	<h3>${decodeURI(currentSong.src).split("/musics/")[1]}</h3>
+	<p>Allah ka banda</p>
+	</div>
+	`;
 };
 
 // Define an async function that runs the main logic
 async function main() {
 	// Get the songs from the server
-	let songs = await getSongs();
+	songs = await getSongs("musics/naaths");
 	// Play the first song and pause it
 	playMusic(songs[0], true);
+
 	// Get the unordered list element in the song list
 	let songUL = document
 		.querySelector(".songList")
@@ -122,36 +149,11 @@ async function main() {
 
 	// Add a time update event listener to the audio
 	currentSong.addEventListener("timeupdate", () => {
-		// Print the current time and duration of the audio to the console
-		console.log(currentSong.currentTime, currentSong.duration);
 		// Set the current time element's innerHTML to the formatted current time
 		document.querySelector(".current-time").innerHTML = `${secondsToMinutes(
 			currentSong.currentTime
 		)}`;
-		// Set the song info element's innerHTML to the song's information
-		document.querySelector(".songinfo").innerHTML = `
-			<img
-			class="thumbnail"
-			src="imgs/musics.svg"
-			alt="thumbnail"
-			/>
-			<div class="content">
-			<h3>${decodeURI(currentSong.src).split("/musics/")[1]}</h3>
-			<p>Allah ka banda</p>
-			</div>
-			`;
 
-		document.querySelector(".songinfo2").innerHTML = `
-			<img
-			class="thumbnail"
-			src="imgs/musics.svg"
-			alt="thumbnail"
-			/>
-			<div class="content">
-			<h3>${decodeURI(currentSong.src).split("/musics/")[1]}</h3>
-			<p>Allah ka banda</p>
-			</div>
-			`;
 		// Set the duration element's innerHTML to the formatted duration
 		document.querySelector(".duration").innerHTML = `${secondsToMinutes(
 			currentSong.duration
@@ -163,11 +165,11 @@ async function main() {
 		// Add a click event listener to the seek bar
 		document.querySelector(".seekbar").addEventListener("click", (e) => {
 			// Calculate the percentage of the click position relative to the seek bar's width
-			let precent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
+			let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
 			// Set the bar element's width to the percentage
-			document.querySelector(".bar").style.width = precent + "%";
+			document.querySelector(".bar").style.width = percent + "%";
 			// Set the audio's current time to the corresponding percentage of the duration
-			currentSong.currentTime = (currentSong.duration * precent) / 100;
+			currentSong.currentTime = (currentSong.duration * percent) / 100;
 		});
 	});
 	// add a addEventListener for hamburger
@@ -178,9 +180,33 @@ async function main() {
 
 	// addEventListener to close the hamburger
 
-	document.querySelector(".close").addEventListener("click", ()=>{
-		document.querySelector(".left").style.left = "-600px"
-	})
+	document.querySelector(".close").addEventListener("click", () => {
+		document.querySelector(".left").style.left = "-600px";
+	});
+
+	// addEventListener to previous and next
+
+	document.getElementById("previous").addEventListener("click", () => {
+		currentSong.pause();
+		let index = songs.indexOf(currentSong.src.split("/musics/").slice(-1)[0]);
+		if (index > 0) {
+			playMusic(songs[index - 1]);
+		}
+	});
+
+	document.getElementById("next").addEventListener("click", () => {
+		currentSong.pause();
+		let index = songs.indexOf(currentSong.src.split("/musics/").slice(-1)[0]);
+		if (index + 1 < songs.length) {
+			playMusic(songs[index + 1]);
+		}
+	});
+
+	document.querySelector(".volume-seekbar").addEventListener("click", (e) => {
+		let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
+		currentSong.volume = percent / 100;
+		document.querySelector(".volume-bar").style.width = percent + "%";
+	});
 }
 // Call the main function
 main();
