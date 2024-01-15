@@ -716,7 +716,7 @@ body {
 }
 
 
-@media (max-width:355px) {
+@media (max-width:365px) {
     .cardContainer {
         justify-content: center;
     }
